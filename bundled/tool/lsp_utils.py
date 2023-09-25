@@ -1,4 +1,4 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
+# Copyright (c) Jaseci Labs. All rights reserved.
 # Licensed under the MIT License.
 """Utility functions and classes for use with running tools over LSP."""
 from __future__ import annotations

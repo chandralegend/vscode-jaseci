@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Jaseci Labs. All rights reserved.
 // Licensed under the MIT License.
 
 import * as path from 'path';

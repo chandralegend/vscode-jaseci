@@ -1,31 +1,32 @@
 {
-    "name": "mypy-type-checker",
-    "displayName": "Mypy Type Checker",
+    "name": "jaseci-extension",
+    "displayName": "Jaseci",
     "description": "%extension.description%",
-    "version": "2023.3.0",
+    "version": "2023.9.0",
     "preview": true,
     "serverInfo": {
-        "name": "Mypy",
-        "module": "mypy"
+        "name": "Jaseci",
+        "module": "jaseci"
     },
-    "publisher": "ms-python",
+    "publisher": "jaseci-labs",
     "license": "MIT",
     "icon": "icon.png",
-    "homepage": "https://github.com/microsoft/vscode-mypy",
+    "homepage": "https://www.jac-lang.org/",
     "repository": {
         "type": "git",
-        "url": "https://github.com/microsoft/vscode-mypy.git"
+        "url": "https://github.com/jaseci-labs/vscode-jaseci.git"
     },
     "bugs": {
-        "url": "https://github.com/microsoft/vscode-mypy/issues"
+        "url": "https://github.com/jaseci-labs/vscode-jaseci/issues"
     },
     "galleryBanner": {
         "color": "#1e415e",
         "theme": "dark"
     },
     "keywords": [
-        "python",
-        "mypy"
+        "jaseci",
+        "jaclang",
+        "jac"
     ],
     "engines": {
         "vscode": "^1.75.0"
@@ -33,7 +34,10 @@
     "categories": [
         "Programming Languages",
         "Linters",
-        "Formatters"
+        "Formatters",
+        "Snippets",
+        "Data Science",
+        "Machine Learning"
     ],
     "extensionDependencies": [
         "ms-python.python"
@@ -41,12 +45,11 @@
     "capabilities": {
         "virtualWorkspaces": {
             "supported": false,
-            "description": "Virtual Workspaces are not supported with mypy."
+            "description": "Virtual Workspaces are not supported with jaseci."
         }
     },
     "activationEvents": [
-        "onLanguage:python",
-        "workspaceContains:mypy.ini"
+        "onLanguage:jac"
     ],
     "main": "./dist/extension.js",
     "scripts": {
@@ -60,30 +63,12 @@
         "lint": "eslint src --ext ts",
         "format-check": "prettier --check 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
         "tests": "node ./out/test/ts_tests/runTest.js",
-        "vsce-package": "vsce package -o mypy.vsix"
+        "vsce-package": "vsce package -o jaseci-extension.vsix"
     },
     "contributes": {
         "configuration": {
             "properties": {
-                "mypy-type-checker.args": {
-                    "default": [],
-                    "markdownDescription": "%settings.args.description%",
-                    "items": {
-                        "type": "string"
-                    },
-                    "scope": "resource",
-                    "type": "array"
-                },
-                "mypy-type-checker.path": {
-                    "default": [],
-                    "markdownDescription": "%settings.path.description%",
-                    "scope": "resource",
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "mypy-type-checker.importStrategy": {
+                "jaseci.importStrategy": {
                     "default": "useBundled",
                     "markdownDescription": "%settings.importStrategy.description%",
                     "enum": [
@@ -97,7 +82,7 @@
                     "scope": "window",
                     "type": "string"
                 },
-                "mypy-type-checker.interpreter": {
+                "jaseci.interpreter": {
                     "default": [],
                     "markdownDescription": "%settings.interpreter.description%",
                     "scope": "resource",
@@ -106,16 +91,7 @@
                     },
                     "type": "array"
                 },
-                "mypy-type-checker.preferDaemon": {
-                    "default": true,
-                    "markdownDescription": "%settings.preferDaemon.description%",
-                    "scope": "resource",
-                    "type": "boolean",
-                    "tags": [
-                        "experimental"
-                    ]
-                },
-                "mypy-type-checker.reportingScope": {
+                "jaseci.reportingScope": {
                     "default": "file",
                     "markdownDescription": "%settings.reportingScope.description%",
                     "enum": [
@@ -132,7 +108,7 @@
                         "experimental"
                     ]
                 },
-                "mypy-type-checker.severity": {
+                "jaseci.severity": {
                     "default": {
                         "error": "Error",
                         "note": "Information"
@@ -150,7 +126,7 @@
                     "scope": "resource",
                     "type": "object"
                 },
-                "mypy-type-checker.showNotifications": {
+                "jaseci.showNotifications": {
                     "default": "off",
                     "markdownDescription": "%settings.showNotifications.description%",
                     "enum": [
@@ -173,8 +149,8 @@
         "commands": [
             {
                 "title": "%command.restartServer%",
-                "category": "Mypy",
-                "command": "mypy-type-checker.restart"
+                "category": "Jaseci",
+                "command": "jaseci.restart"
             }
         ]
     },

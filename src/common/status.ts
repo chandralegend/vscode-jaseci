@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Jaseci Labs. All rights reserved.
 // Licensed under the MIT License.
 
 import { LanguageStatusItem, Disposable, l10n, LanguageStatusSeverity } from 'vscode';

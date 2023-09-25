@@ -1,4 +1,4 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
+# Copyright (c) Jaseci Labs. All rights reserved.
 # Licensed under the MIT License.
 """Debugging support for LSP."""
 
@@ -35,5 +35,6 @@ if debugger_path:
     debugpy.breakpoint()
 
 SERVER_PATH = os.fspath(pathlib.Path(__file__).parent / "lsp_server.py")
+print(f"Running {SERVER_PATH}...")
 # NOTE: Set breakpoint in `lsp_server.py` before continuing.
 runpy.run_path(SERVER_PATH, run_name="__main__")
