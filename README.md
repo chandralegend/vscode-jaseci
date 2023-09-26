@@ -1,4 +1,7 @@
-# Jaseci extension for Visual Studio Code
+<!-- Icon.png in 100px * 100px in HTML -->
+
+
+# <img src="icon.png" alt="Jaseci Logo" width="50" height="50"> Jaseci Extension for VScode <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Visual_Studio_Code_1.35_icon.svg/2048px-Visual_Studio_Code_1.35_icon.svg.png" alt="Jaseci Logo" width="50" height="50">
 
 ## Usage
 

@@ -53,6 +53,8 @@ MAX_WORKERS = 5
 LSP_SERVER = server.LanguageServer(
     name="Jaseci", version="v0.0.1", max_workers=MAX_WORKERS
 )
+LSP_SERVER.workspace_filled = False
+LSP_SERVER.dep_table = {}
 
 # **********************************************************
 # Language Server features start here
@@ -62,31 +64,72 @@ LSP_SERVER = server.LanguageServer(
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls, params: lsp.DidChangeTextDocumentParams):
     """Stuff to happen on text document did change"""
-    ls.show_message("Text Document Did Change")
+    utils.update_doc_tree(ls, params.text_document.uri)
+    # utils._validate(ls, params)
 
 
-# @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
-# def did_open(params: lsp.DidOpenTextDocumentParams) -> None:
-#     """LSP handler for textDocument/didOpen request."""
-#     document = LSP_SERVER.workspace.get_document(params.text_document.uri)
-#     _linting_helper(document)
+@LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_SAVE)
+def did_save(ls, params: lsp.DidSaveTextDocumentParams):
+    """Stuff to happen on text document did save"""
+    utils.update_doc_tree(ls, params.text_document.uri)
+    # utils._validate(ls, params)
 
 
-# @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_SAVE)
-# def did_save(params: lsp.DidSaveTextDocumentParams) -> None:
-#     """LSP handler for textDocument/didSave request."""
-#     document = LSP_SERVER.workspace.get_document(params.text_document.uri)
-#     _linting_helper(document)
+@LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_CLOSE)
+def did_close(ls, params: lsp.DidCloseTextDocumentParams):
+    """Stuff to happen on text document did close"""
+    ls.show_message("Text Document Did Close")
 
 
-# @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_CLOSE)
-# def did_close(params: lsp.DidCloseTextDocumentParams) -> None:
-#     """LSP handler for textDocument/didClose request."""
-#     document = LSP_SERVER.workspace.get_document(params.text_document.uri)
-#     settings = _get_settings_by_document(document)
-#     if settings["reportingScope"] == "file":
-#         # Publishing empty diagnostics to clear the entries for this file.
-#         LSP_SERVER.publish_diagnostics(document.uri, [])
+@LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
+async def did_open(ls, params: lsp.DidOpenTextDocumentParams):
+    """Stuff to happen on text document did open"""
+    if not ls.workspace_filled:
+        utils.fill_workspace(ls)
+    # utils._validate(ls, params)
+
+
+@LSP_SERVER.feature(lsp.TEXT_DOCUMENT_COMPLETION)
+def completions(params: Optional[lsp.CompletionParams] = None) -> lsp.CompletionList:
+    """Returns completion items."""
+    completion_items = utils._get_completion_items(LSP_SERVER, params)
+    return lsp.CompletionList(is_incomplete=False, items=completion_items)
+
+
+@LSP_SERVER.feature(lsp.WORKSPACE_SYMBOL)
+def workspace_symbol(ls, params: lsp.WorkspaceSymbolParams):
+    """Workspace symbols."""
+    symbols = []
+    for doc in ls.workspace.documents.values():
+        if hasattr(doc, "symbols"):
+            symbols.extend(doc.symbols)
+        else:
+            doc.symbols = utils.get_doc_symbols(ls, doc.uri)
+            symbols.extend(doc.symbols)
+    return symbols
+
+
+@LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DOCUMENT_SYMBOL)
+def document_symbol(ls, params: lsp.DocumentSymbolParams):
+    """Document symbols."""
+    uri = params.text_document.uri
+    doc = ls.workspace.get_document(uri)
+    if not hasattr(doc, "symbols"):
+        utils.update_doc_tree(ls, doc.uri)
+        doc_symbols = utils.get_doc_symbols(ls, doc.uri)
+        return [s for s in doc_symbols if s.location.uri == doc.uri]
+    else:
+        return [s for s in doc.symbols if s.location.uri == doc.uri]
+
+
+@LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DEFINITION)
+def definition(ls, params: lsp.DefinitionParams):
+    """Returns definition of a symbol."""
+    doc = ls.workspace.get_document(params.text_document.uri)
+    position = params.position
+    print(doc.symbols, position)
+    ls.show_message("Text Document Definition")
+    return None
 
 
 def _is_empty_diagnostics(
@@ -155,17 +198,17 @@ _reported_file_paths = set()
 #     return []
 
 
-DIAGNOSTIC_RE = re.compile(
-    r"^(?P<location>(?P<filepath>..[^:]*):(?P<line>\d+):(?P<char>\d+)(?::(?P<end_line>\d+):(?P<end_char>\d+))?): (?P<type>\w+): (?P<message>.*?)(?:  \[(?P<code>[\w-]+)\])?$"
-)
+# DIAGNOSTIC_RE = re.compile(
+#     r"^(?P<location>(?P<filepath>..[^:]*):(?P<line>\d+):(?P<char>\d+)(?::(?P<end_line>\d+):(?P<end_char>\d+))?): (?P<type>\w+): (?P<message>.*?)(?:  \[(?P<code>[\w-]+)\])?$"
+# )
 
 
-def _get_group_dict(line: str) -> Optional[Dict[str, str | None]]:
-    match = DIAGNOSTIC_RE.match(line)
-    if match:
-        return match.groupdict()
+# def _get_group_dict(line: str) -> Optional[Dict[str, str | None]]:
+#     match = DIAGNOSTIC_RE.match(line)
+#     if match:
+#         return match.groupdict()
 
-    return None
+#     return None
 
 
 # def _parse_output_using_regex(
@@ -254,20 +297,20 @@ def _get_group_dict(line: str) -> Optional[Dict[str, str | None]]:
 #     return diagnostics
 
 
-def _get_severity(
-    code: str, code_type: str, severity: Dict[str, str]
-) -> lsp.DiagnosticSeverity:
-    value = severity.get(code, None) or severity.get(code_type, "Error")
-    try:
-        return lsp.DiagnosticSeverity[value]
-    except KeyError:
-        pass
+# def _get_severity(
+#     code: str, code_type: str, severity: Dict[str, str]
+# ) -> lsp.DiagnosticSeverity:
+#     value = severity.get(code, None) or severity.get(code_type, "Error")
+#     try:
+#         return lsp.DiagnosticSeverity[value]
+#     except KeyError:
+#         pass
 
-    return lsp.DiagnosticSeverity.Information
+#     return lsp.DiagnosticSeverity.Information
 
 
 # **********************************************************
-# Linting features end here
+# Jaseci Features end here
 # **********************************************************
 
 
