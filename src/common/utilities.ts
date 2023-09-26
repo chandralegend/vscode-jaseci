@@ -69,9 +69,9 @@ export async function getProjectRoot(): Promise<WorkspaceFolder> {
 
 export function getDocumentSelector(): DocumentSelector {
     return isVirtualWorkspace()
-        ? [{ language: 'python' }]
+        ? [{ language: 'jac' }]
         : [
-              { scheme: 'file', language: 'python' },
-              { scheme: 'untitled', language: 'python' },
+              { scheme: 'file', language: 'jac' },
+              { scheme: 'untitled', language: 'jac' },
           ];
 }
